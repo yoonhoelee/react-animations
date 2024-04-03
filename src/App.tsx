@@ -79,13 +79,13 @@ const svg = {
 };
 
 const box = {
-    initial: {
-        x:500,
+    entry: (isBack: boolean) => ({
+        x: isBack? -500:500,
         opacity: 0,
         scale: 0,
-    },
-    visible: {
-        x:0,
+    }),
+    center: {
+        x: 0,
         opacity: 1,
         scale: 1,
         rotateZ: 360,
@@ -94,31 +94,41 @@ const box = {
         },
     },
 
-    exit: {x: -500, opacity: 0, scale: 0, transition: {duration: 1}},
+    exit: (isBack: boolean) => ({
+        x: isBack? 500:-500,
+        opacity: 0,
+        scale: 0,
+        transition: {duration: 1}
+    }),
 }
 
 function App() {
     const [showing, setShowing] = useState(false);
     const toggleShowing = () => setShowing((prev) => !prev);
     const [visible, setVisible] = useState(1);
-    const nextPlease = () => setVisible((prev) => (prev === 10 ? 10 : prev + 1));
-    const prevPlease = () => setVisible((prev) => (prev === 1 ? 1 : prev - 1));
+    const [back, setBack] = useState(false);
+    const nextPlease = () => {
+        setBack(false);
+        setVisible((prev) => (prev === 10 ? 10 : prev + 1));
+    };
+    const prevPlease = () => {
+        setBack(true);
+        setVisible((prev) => (prev === 1 ? 1 : prev - 1));
+    };
+
     return (
         <Wrapper>
-            <AnimatePresence>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
-                    i === visible ? (
-                        <Box
-                            variants={box}
-                            initial="invisible"
-                            animate="visible"
-                            exit="exit"
-                            key={i}
-                        >
-                            {i}
-                        </Box>
-                    ) : null
-                )}
+            <AnimatePresence custom={back}>
+                <Box
+                    custom={back}
+                    variants={box}
+                    initial="entry"
+                    animate="center"
+                    exit="exit"
+                    key={visible}
+                >
+                    {visible}
+                </Box>
             </AnimatePresence>
             <button onClick={nextPlease}>next</button>
             <button onClick={prevPlease}>prev</button>
